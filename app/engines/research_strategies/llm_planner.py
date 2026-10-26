@@ -29,6 +29,8 @@ Requirements:
 - Use only the supplied research dimensions.
 - Avoid fabricated market statistics or unsupported factual claims.
 - Keep the plan practical for a product-launch decision.
+- Give a importance score to each dimension on a scale of 1 to 10, where 10 is the most important.
+- Also for each dimension, provide a target coverage percentage for the survey, between 0 to 1, which indicates minimum amount of information needed from the respondents for that dimension before ending the survey.
 """
 
     result = generate_structured_output(prompt, ResearchPlan)

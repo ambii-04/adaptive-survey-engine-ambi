@@ -9,7 +9,7 @@ class ResearchCreate(BaseModel):
     topic: str = Field(min_length=3)
     target_audience: str
     geography: str
-    dimensions: list[ResearchDimensionInput] = Field(min_length=1)
+    dimensions: list[str] = Field(min_items=1)
 
 class ResearchResponse(BaseModel):
     id: int
