@@ -43,10 +43,24 @@ from app.engines.analytics.project_report import build_project_report
 from app.engines.analytics.project_insights import generate_project_insights
 from app.db.models import SessionDimensionCoverage
 from app.engines.analytics.coverage import update_session_coverage
-
+from fastapi.middleware.cors import CORSMiddleware
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Adaptive Survey Engine", version="0.1.0")
+
+ 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def health():
