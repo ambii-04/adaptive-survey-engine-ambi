@@ -76,11 +76,12 @@ def create_research(payload: ResearchCreate, db: Session = Depends(get_db)):
     )
     project.dimensions = [
         ResearchDimension(
-            name=d.name,
-            importance=d.importance,
-            target_coverage=d.target_coverage,
+            name=name,
+            importance=0,
+            target_coverage=0,
+            achieved_coverage=0,
         )
-        for d in payload.dimensions
+        for name in payload.dimensions
     ]
     db.add(project)
     db.commit()
@@ -962,20 +963,54 @@ def session_analytics(
     }
 
 @app.post("/api/v1/llm/research-plan")
-def create_llm_research_plan(payload: LLMResearchPlanRequest):
+def create_llm_research_plan(
+    payload: LLMResearchPlanRequest,
+    db: Session = Depends(get_db),
+):
+    project = db.get(ResearchProject, payload.research_id)
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Research project not found",
+        )
+
     try:
         plan = generate_research_plan_with_llm(
-            research_id=payload.research_id,
-            topic=payload.topic,
-            target_audience=payload.target_audience,
-            geography=payload.geography,
-            dimensions=payload.dimensions,
+            research_id=project.id,
+            topic=project.topic,
+            target_audience=project.target_audience,
+            geography=project.geography,
+            dimensions=[dimension.name for dimension in project.dimensions],
         )
+
+        dimension_info = {
+            item.dimension: item for item in plan.dimension_info
+        }
+        missing_dimensions = [
+            dimension.name
+            for dimension in project.dimensions
+            if dimension.name not in dimension_info
+        ]
+        if missing_dimensions:
+            raise ValueError(
+                "Research plan did not provide importance and coverage for "
+                f"every dimension: {', '.join(missing_dimensions)}"
+            )
+
+        for dimension in project.dimensions:
+            info = dimension_info[dimension.name]
+            dimension.importance = info.importance
+            dimension.target_coverage = info.target_coverage
+
+        project.research_plan = plan.model_dump(mode="json")
+        db.commit()
         return plan.model_dump()
 
     except RuntimeError as exc:
+        db.rollback()
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except ValueError as exc:
+        db.rollback()
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 

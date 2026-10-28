@@ -1,4 +1,5 @@
 from app.schemas.research_plan import (
+    Dimension_info,
     ResearchPlan,
     ResearchConstruct,
     ResearchHypothesis,
@@ -28,6 +29,13 @@ def test_llm_planner_validates_output(monkeypatch):
                 hypothesis_id="H1",
                 statement="Purchase interest varies by respondent.",
                 dimension="Interest",
+            )
+        ],
+        dimension_info=[
+            Dimension_info(
+                dimension="Interest",
+                importance=8,
+                target_coverage=0.75,
             )
         ],
     )

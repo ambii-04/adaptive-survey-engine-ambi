@@ -1,12 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LLMResearchPlanRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     research_id: int = Field(gt=0)
-    topic: str = Field(min_length=3)
-    target_audience: str = Field(min_length=2)
-    geography: str = Field(min_length=2)
-    dimensions: list[str] = Field(min_length=1)
 
 
 class LLMSurveyRequest(BaseModel):

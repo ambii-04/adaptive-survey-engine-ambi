@@ -11,6 +11,7 @@ class ResearchProject(Base):
     target_audience: Mapped[str] = mapped_column(String(200))
     geography: Mapped[str] = mapped_column(String(200))
     status: Mapped[str] = mapped_column(String(50), default="created")
+    research_plan: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     dimensions: Mapped[list["ResearchDimension"]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
     )
